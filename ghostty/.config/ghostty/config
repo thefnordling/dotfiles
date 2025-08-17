@@ -1,0 +1,9 @@
+font-family = MesloLGS NF 
+window-padding-x = 8
+gtk-single-instance = true
+theme = catppuccin-mocha.conf
+copy-on-select = clipboard
+clipboard-write = allow
+clipboard-read = allow
+app-notifications = false
+term = xterm-256color
