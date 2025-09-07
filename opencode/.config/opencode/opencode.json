@@ -13,11 +13,7 @@
     },
     "context7": {
       "type": "local",
-      "command": [
-        "npx",
-        "-y",
-        "@upstash/context7-mcp"
-      ],
+      "command": ["npx", "-y", "@upstash/context7-mcp"],
       "environment": {
         "NODE_EXTRA_CA_CERTS": "/etc/ssl/certs/ca-certificates.crt"
       },

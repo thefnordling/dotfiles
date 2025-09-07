@@ -1,0 +1,153 @@
+type: llm
+provider: ollama_llm
+timeout: 240
+models:
+  - alias: default
+    model: gpt-oss:120b
+    context_window_size: 131072
+    kwargs:
+      temperature: 0
+      top_p: 0.9
+      top_k: 40
+      # num_predict: 4096  # optional cap
+---
+type: embedder
+provider: ollama_embedder
+models:
+  - model: dengcao/Qwen3-Embeddings-8B:Q8_0
+    alias: default
+    timeout: 120
+---
+type: engine
+provider: wren_ui
+endpoint: http://wren-ui:3000
+---
+type: engine
+provider: wren_ibis
+endpoint: http://ibis-server:8000
+---
+type: document_store
+provider: qdrant
+location: http://docker.home.arpa:6333
+embedding_model_dim: 4096
+collection: wren_embeddings
+timeout: 120
+recreate_index: false
+---
+type: pipeline
+pipes:
+  - name: db_schema_indexing
+    embedder: ollama_embedder.default
+    document_store: qdrant
+  - name: historical_question_indexing
+    embedder: ollama_embedder.default
+    document_store: qdrant
+  - name: table_description_indexing
+    embedder: ollama_embedder.default
+    document_store: qdrant
+  - name: db_schema_retrieval
+    llm: ollama_llm.default
+    embedder: ollama_embedder.default
+    document_store: qdrant
+  - name: historical_question_retrieval
+    embedder: ollama_embedder.default
+    document_store: qdrant
+  - name: sql_generation
+    llm: ollama_llm.default
+    engine: wren_ui
+    document_store: qdrant
+  - name: sql_correction
+    llm: ollama_llm.default
+    engine: wren_ui
+    document_store: qdrant
+  - name: followup_sql_generation
+    llm: ollama_llm.default
+    engine: wren_ui
+    document_store: qdrant
+  - name: sql_answer
+    llm: ollama_llm.default
+  - name: semantics_description
+    llm: ollama_llm.default
+  - name: relationship_recommendation
+    llm: ollama_llm.default
+    engine: wren_ui
+  - name: question_recommendation
+    llm: ollama_llm.default
+  - name: question_recommendation_db_schema_retrieval
+    llm: ollama_llm.default
+    embedder: ollama_embedder.default
+    document_store: qdrant
+  - name: question_recommendation_sql_generation
+    llm: ollama_llm.default
+    engine: wren_ui
+    document_store: qdrant
+  - name: intent_classification
+    llm: ollama_llm.default
+    embedder: ollama_embedder.default
+    document_store: qdrant
+  - name: misleading_assistance
+    llm: ollama_llm.default
+  - name: data_assistance
+    llm: ollama_llm.default
+  - name: sql_pairs_indexing
+    document_store: qdrant
+    embedder: ollama_embedder.default
+  - name: sql_pairs_retrieval
+    document_store: qdrant
+    embedder: ollama_embedder.default
+    llm: ollama_llm.default
+  - name: preprocess_sql_data
+    llm: ollama_llm.default
+  - name: sql_executor
+    engine: wren_ui
+  - name: chart_generation
+    llm: ollama_llm.default
+  - name: chart_adjustment
+    llm: ollama_llm.default
+  - name: user_guide_assistance
+    llm: ollama_llm.default
+  - name: sql_question_generation
+    llm: ollama_llm.default
+  - name: sql_generation_reasoning
+    llm: ollama_llm.default
+  - name: followup_sql_generation_reasoning
+    llm: ollama_llm.default
+  - name: sql_regeneration
+    llm: ollama_llm.default
+    engine: wren_ui
+  - name: instructions_indexing
+    embedder: ollama_embedder.default
+    document_store: qdrant
+  - name: instructions_retrieval
+    embedder: ollama_embedder.default
+    document_store: qdrant
+  - name: sql_functions_retrieval
+    engine: wren_ibis
+    document_store: qdrant
+  - name: project_meta_indexing
+    document_store: qdrant
+  - name: sql_tables_extraction
+    llm: ollama_llm.default
+---
+settings:
+  doc_endpoint: https://docs.getwren.ai
+  is_oss: true
+  engine_timeout: 30
+  column_indexing_batch_size: 50
+  table_retrieval_size: 10
+  table_column_retrieval_size: 100
+  allow_intent_classification: true
+  allow_sql_generation_reasoning: true
+  allow_sql_functions_retrieval: true
+  enable_column_pruning: false
+  max_sql_correction_retries: 3
+  query_cache_maxsize: 1000
+  query_cache_ttl: 3600
+  langfuse_enable: false
+  logging_level: DEBUG
+  development: false
+  historical_question_retrieval_similarity_threshold: 0.9
+  sql_pairs_similarity_threshold: 0.7
+  sql_pairs_retrieval_max_size: 10
+  instructions_similarity_threshold: 0.7
+  instructions_top_k: 10
