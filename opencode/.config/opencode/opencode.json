@@ -30,6 +30,23 @@
         "NODE_EXTRA_CA_CERTS": "/etc/ssl/certs/ca-certificates.crt"
       },
       "enabled": true
+    },
+    "serena": {
+      "type": "local",
+      "command": [
+        "uvx",
+        "--from",
+        "git+https://github.com/oraios/serena",
+        "serena",
+        "start-mcp-server",
+        "--context",
+        "ide-assistant",
+        "--project",
+        "."
+      ],
+      "environment": {
+        "NODE_EXTRA_CA_CERTS": "/etc/ssl/certs/ca-certificates.crt"
+      }
     }
   },
   "provider": {
