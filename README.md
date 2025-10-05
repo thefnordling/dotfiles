@@ -71,13 +71,13 @@ After editing dotfiles in this repository, apply changes with:
 cd ~/code/dotfiles
 
 # Restow shell configs
-stow -R zsh
+stow -t ~ -R zsh
 
 # Restow powerlevel10k theme
-stow -R powerlevel10k
+stow -t ~ -R powerlevel10k
 
 # Or restow everything
-stow -R */
+stow -t ~ -R */
 ```
 
 ## Package Structure
@@ -97,6 +97,10 @@ stow -R */
 - Check that Go is in PATH: `go version`
 
 **Stow conflicts?**
-- Existing config files will be backed up to `~/.shell-backup-*`
+- Existing config files will be backed up to `/tmp/shell-backup-*`
 - If you get stow conflicts, manually remove or backup the conflicting files
 
+**No .zshrc after running setup-shell.sh?**
+- The script must be run from `~/code/dotfiles` directory
+- Stow requires `-t ~` flag to target home directory correctly
+- Check if backups exist in `/tmp/shell-backup-*` and restore if needed

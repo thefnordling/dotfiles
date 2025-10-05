@@ -3,7 +3,7 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BACKUP_DIR="$HOME/.shell-backup-$(date +%Y%m%d-%H%M%S)"
+BACKUP_DIR="/tmp/shell-backup-$(date +%Y%m%d-%H%M%S)"
 
 echo "=== Shell Setup Script ==="
 echo "This script will:"
@@ -95,19 +95,19 @@ cd "$SCRIPT_DIR"
 
 if [ -L "$HOME/.zshrc" ]; then
     echo "  → Restowing zsh package..."
-    stow -R zsh
+    stow -t ~ -R zsh
 else
     echo "  → Stowing zsh package..."
-    stow zsh
+    stow -t ~ zsh
 fi
 echo "  ✓ zsh configs applied"
 
 if [ -L "$HOME/.p10k.zsh" ]; then
     echo "  → Restowing powerlevel10k package..."
-    stow -R powerlevel10k
+    stow -t ~ -R powerlevel10k
 else
     echo "  → Stowing powerlevel10k package..."
-    stow powerlevel10k
+    stow -t ~ powerlevel10k
 fi
 echo "  ✓ powerlevel10k config applied"
 
