@@ -2,6 +2,16 @@
 
 My Linux environment configuration, managed with GNU Stow.
 
+## Installation
+
+Clone this repository to your home directory:
+
+```bash
+git clone https://github.com/YOUR_USERNAME/dotfiles.git ~/code/dotfiles
+cd ~/code/dotfiles
+chmod +x setup-shell.sh setup-nvim.sh
+```
+
 ## Prerequisites
 
 Install GNU Stow:
