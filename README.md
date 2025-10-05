@@ -7,7 +7,7 @@ My Linux environment configuration, managed with GNU Stow.
 Clone this repository to your home directory:
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/dotfiles.git ~/code/dotfiles
+git clone https://github.com/thefnordling/dotfiles.git ~/code/dotfiles
 cd ~/code/dotfiles
 chmod +x setup-shell.sh setup-nvim.sh
 ```
