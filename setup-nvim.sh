@@ -138,7 +138,13 @@ for b in nvim vi vim rg fd git go node npm dotnet python3; do
 done
 
 echo "[11] Clone config"
-[ -d "$HOME/.config/nvim" ] || git clone https://github.com/thefnordling/kickstart.nvim.git "$HOME/.config/nvim"
+if [ -d "$HOME/.config/nvim" ]; then
+    TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+    BACKUP_DIR="$HOME/.config/nvim-backup-$TIMESTAMP"
+    echo "  → Backing up existing nvim config to $BACKUP_DIR"
+    mv "$HOME/.config/nvim" "$BACKUP_DIR"
+fi
+git clone https://github.com/thefnordling/kickstart.nvim.git "$HOME/.config/nvim"
 
 echo "Done! Installation complete."
 echo ""
