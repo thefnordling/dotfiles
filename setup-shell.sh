@@ -9,7 +9,7 @@ echo "=== Shell Setup Script ==="
 echo "This script will:"
 echo "  1. Uninstall oh-my-zsh (if present)"
 echo "  2. Install zsh"
-echo "  3. Change default shell to zsh"
+echo "  3. Optionally change default shell to zsh"
 echo "  4. Install powerlevel10k"
 echo "  5. Apply dotfiles using GNU Stow"
 echo ""
@@ -53,12 +53,20 @@ ZSH_PATH=$(which zsh)
 if [ "$CURRENT_SHELL" = "$ZSH_PATH" ]; then
     echo "  ✓ Default shell already zsh (skip)"
 else
-    echo "  → Changing default shell to zsh..."
-    if ! grep -q "^$ZSH_PATH$" /etc/shells; then
-        echo "$ZSH_PATH" | sudo tee -a /etc/shells
+    echo "  Current shell: $CURRENT_SHELL"
+    echo "  Target shell: $ZSH_PATH"
+    read -p "  Change default shell to zsh? (y/n): " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        echo "  → Changing default shell to zsh..."
+        if ! grep -q "^$ZSH_PATH$" /etc/shells; then
+            echo "$ZSH_PATH" | sudo tee -a /etc/shells
+        fi
+        chsh -s "$ZSH_PATH"
+        echo "  ✓ Default shell changed to zsh (restart session to take effect)"
+    else
+        echo "  ✓ Keeping current shell"
     fi
-    chsh -s "$ZSH_PATH"
-    echo "  ✓ Default shell changed to zsh (restart session to take effect)"
 fi
 
 echo "[4/5] Installing powerlevel10k..."
