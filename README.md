@@ -9,7 +9,7 @@ Clone this repository to your home directory:
 ```bash
 git clone https://github.com/thefnordling/dotfiles.git ~/code/dotfiles
 cd ~/code/dotfiles
-chmod +x setup-shell.sh setup-nvim.sh
+chmod +x *.sh
 ```
 
 ## Prerequisites
