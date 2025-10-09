@@ -15,6 +15,7 @@ chmod +x setup-shell.sh setup-nvim.sh
 ## Prerequisites
 
 Install GNU Stow:
+
 ```bash
 sudo apt-get install stow
 ```
@@ -30,6 +31,7 @@ Run these scripts in order for a complete development environment setup:
 ```
 
 This script will:
+
 - Remove oh-my-zsh if present
 - Install zsh
 - Change your default shell to zsh
@@ -45,23 +47,17 @@ This script will:
 **Note**: This requires `setup-shell.sh` to be run first.
 
 This script will:
+
 - Install Neovim v0.11.3
 - Install development tools (Go, Node via NVM, Python, .NET)
 - Install Meslo Nerd Font
 - Clone kickstart.nvim configuration
 
-### 3. Restart Your Terminal
+# 3. GitHub Credential Manager
 
 ```bash
-exec zsh
+./setup-ghcr.sh
 ```
-
-## Idempotency
-
-Both scripts are fully idempotent and safe to re-run:
-- They detect what's already installed and skip those steps
-- Safe to run across multiple hosts
-- Updates tools when re-run (e.g., powerlevel10k gets updated)
 
 ## Manual Configuration Updates
 
@@ -79,28 +75,3 @@ stow -t ~ -R powerlevel10k
 # Or restow everything
 stow -t ~ -R */
 ```
-
-## Package Structure
-
-- `zsh/` - Shell configuration (.zshenv, .zprofile, .zshrc)
-- `powerlevel10k/` - Powerlevel10k theme configuration (.p10k.zsh)
-- `ghostty/` - Ghostty terminal configuration
-- `opencode/` - OpenCode editor configuration
-- `wrenai/` - WrenAI configuration
-
-## Troubleshooting
-
-**Neovim plugins not installing?**
-- Ensure you ran `setup-shell.sh` first
-- Restart your terminal: `exec zsh`
-- Check that NVM is loaded: `nvm --version`
-- Check that Go is in PATH: `go version`
-
-**Stow conflicts?**
-- Existing config files will be backed up to `/tmp/shell-backup-*`
-- If you get stow conflicts, manually remove or backup the conflicting files
-
-**No .zshrc after running setup-shell.sh?**
-- The script must be run from `~/code/dotfiles` directory
-- Stow requires `-t ~` flag to target home directory correctly
-- Check if backups exist in `/tmp/shell-backup-*` and restore if needed
