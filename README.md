@@ -56,7 +56,7 @@ This script will:
 # 3. GitHub Credential Manager
 
 ```bash
-./setup-ghcr.sh
+./setup-ghcm.sh
 ```
 
 ## Manual Configuration Updates
