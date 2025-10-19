@@ -20,7 +20,7 @@ else
 fi
 
 echo "[2] Dev packages (without neovim/nodejs from apt)"
-sudo apt install -y --no-install-recommends git build-essential unzip curl xclip ripgrep fd-find fontconfig fonts-noto-color-emoji make gcc zsh
+sudo apt install -y --no-install-recommends git build-essential unzip curl xclip ripgrep fd-find fontconfig fonts-noto-color-emoji make gcc zsh netcat
 
 echo "[3] Remove conflicting packages"
 sudo apt remove -y vim vim-tiny vi neovim nodejs libnode-dev libnode109 || true

@@ -12,14 +12,6 @@ cd ~/code/dotfiles
 chmod +x *.sh
 ```
 
-## Prerequisites
-
-Install GNU Stow:
-
-```bash
-sudo apt-get install stow
-```
-
 ## Setup Instructions
 
 Run these scripts in order for a complete development environment setup:
@@ -33,10 +25,17 @@ Run these scripts in order for a complete development environment setup:
 This script will:
 
 - Remove oh-my-zsh if present
-- Install zsh
+- Install zsh, GNU Stow, and tmux
 - Change your default shell to zsh
 - Install powerlevel10k theme
 - Apply shell configurations using GNU Stow
+
+After running the script, install tmux plugins:
+
+```bash
+tmux
+# Press Ctrl-a I (capital i) to install plugins
+```
 
 ### 2. Development Tools Setup
 

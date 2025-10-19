@@ -8,17 +8,12 @@ BACKUP_DIR="/tmp/shell-backup-$(date +%Y%m%d-%H%M%S)"
 echo "=== Shell Setup Script ==="
 echo "This script will:"
 echo "  1. Uninstall oh-my-zsh (if present)"
-echo "  2. Install zsh"
+echo "  2. Install zsh and GNU Stow"
 echo "  3. Optionally change default shell to zsh"
 echo "  4. Install powerlevel10k"
 echo "  5. Apply dotfiles using GNU Stow"
+echo "  6. Install tmux plugin manager (tpm)"
 echo ""
-
-if ! command -v stow &> /dev/null; then
-    echo "ERROR: GNU Stow is not installed. Please install it first:"
-    echo "  sudo apt-get install stow"
-    exit 1
-fi
 
 echo "[1/5] Checking for oh-my-zsh..."
 if [ -d "$HOME/.oh-my-zsh" ]; then
@@ -36,14 +31,33 @@ else
     echo "  ✓ oh-my-zsh not installed (skip)"
 fi
 
-echo "[2/5] Installing zsh..."
-if command -v zsh &> /dev/null; then
-    echo "  ✓ zsh already installed (skip)"
+echo "[2/5] Installing zsh and GNU Stow..."
+NEED_INSTALL=0
+if ! command -v zsh &> /dev/null; then
+    echo "  → zsh not found, will install"
+    NEED_INSTALL=1
 else
-    echo "  → Installing zsh via apt..."
+    echo "  ✓ zsh already installed"
+fi
+
+if ! command -v stow &> /dev/null; then
+    echo "  → stow not found, will install"
+    NEED_INSTALL=1
+else
+    echo "  ✓ stow already installed"
+fi
+
+if ! command -v tmux &> /dev/null; then
+    echo "  → tmux not found, will install"
+    NEED_INSTALL=1
+else
+    echo "  ✓ tmux already installed"
+fi
+
+if [ $NEED_INSTALL -eq 1 ]; then
     sudo apt-get update
-    sudo apt-get install -y zsh
-    echo "  ✓ zsh installed"
+    sudo apt-get install -y zsh stow tmux
+    echo "  ✓ Installation complete"
 fi
 
 echo "[3/5] Changing default shell to zsh..."
@@ -99,6 +113,12 @@ if [ -f "$HOME/.p10k.zsh" ] && [ ! -L "$HOME/.p10k.zsh" ]; then
     echo "  → Backed up existing .p10k.zsh to $BACKUP_DIR"
 fi
 
+if [ -f "$HOME/.tmux.conf" ] && [ ! -L "$HOME/.tmux.conf" ]; then
+    mkdir -p "$BACKUP_DIR"
+    mv "$HOME/.tmux.conf" "$BACKUP_DIR/"
+    echo "  → Backed up existing .tmux.conf to $BACKUP_DIR"
+fi
+
 cd "$SCRIPT_DIR"
 
 if [ -L "$HOME/.zshrc" ]; then
@@ -118,6 +138,24 @@ else
     stow -t ~ powerlevel10k
 fi
 echo "  ✓ powerlevel10k config applied"
+
+if [ -L "$HOME/.tmux.conf" ]; then
+    echo "  → Restowing tmux package..."
+    stow -t ~ -R tmux
+else
+    echo "  → Stowing tmux package..."
+    stow -t ~ tmux
+fi
+echo "  ✓ tmux config applied"
+
+echo "[6/6] Installing tmux plugin manager (tpm)..."
+if [ -d "$HOME/.tmux/plugins/tpm" ]; then
+    echo "  → Removing existing tpm installation..."
+    rm -rf "$HOME/.tmux/plugins/tpm"
+fi
+mkdir -p "$HOME/.tmux/plugins"
+git clone https://github.com/tmux-plugins/tpm "$HOME/.tmux/plugins/tpm"
+echo "  ✓ tpm installed"
 
 echo ""
 echo "=== Setup Complete ==="
