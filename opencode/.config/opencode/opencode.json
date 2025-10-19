@@ -18,20 +18,8 @@
         "NODE_EXTRA_CA_CERTS": "/etc/ssl/certs/ca-certificates.crt"
       },
       "enabled": true
-    },
-    "sequential-thinking": {
-      "type": "local",
-      "command": [
-        "npx",
-        "-y",
-        "@modelcontextprotocol/server-sequential-thinking"
-      ],
-      "environment": {
-        "NODE_EXTRA_CA_CERTS": "/etc/ssl/certs/ca-certificates.crt"
-      },
-      "enabled": true
-    },
-    "serena": {
+    }
+    /*    "serena": {
       "type": "local",
       "command": [
         "uvx",
@@ -47,7 +35,7 @@
       "environment": {
         "NODE_EXTRA_CA_CERTS": "/etc/ssl/certs/ca-certificates.crt"
       }
-    }
+    }*/
   },
   "provider": {
     "ollama": {

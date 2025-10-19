@@ -12,7 +12,7 @@ echo "  2. Install zsh and GNU Stow"
 echo "  3. Optionally change default shell to zsh"
 echo "  4. Install powerlevel10k"
 echo "  5. Apply dotfiles using GNU Stow"
-echo "  6. Install catppuccin tmux theme"
+echo "  6. Install tmux plugins (catppuccin, vim-tmux-navigator)"
 echo "  7. Install tmux-mem-cpu-load"
 echo ""
 
@@ -149,7 +149,9 @@ else
 fi
 echo "  ✓ tmux config applied"
 
-echo "[6/6] Installing catppuccin tmux theme..."
+echo "[6/6] Installing tmux plugins..."
+mkdir -p "$HOME/.config/tmux/plugins"
+
 if [ -d "$HOME/.config/tmux/plugins/catppuccin" ]; then
     echo "  → Updating existing catppuccin theme..."
     cd "$HOME/.config/tmux/plugins/catppuccin"
@@ -158,9 +160,20 @@ if [ -d "$HOME/.config/tmux/plugins/catppuccin" ]; then
     echo "  ✓ catppuccin theme updated"
 else
     echo "  → Installing catppuccin theme..."
-    mkdir -p "$HOME/.config/tmux/plugins"
     git clone https://github.com/catppuccin/tmux.git "$HOME/.config/tmux/plugins/catppuccin"
     echo "  ✓ catppuccin theme installed"
+fi
+
+if [ -d "$HOME/.config/tmux/plugins/vim-tmux-navigator" ]; then
+    echo "  → Updating existing vim-tmux-navigator..."
+    cd "$HOME/.config/tmux/plugins/vim-tmux-navigator"
+    git pull
+    cd "$SCRIPT_DIR"
+    echo "  ✓ vim-tmux-navigator updated"
+else
+    echo "  → Installing vim-tmux-navigator..."
+    git clone https://github.com/christoomey/vim-tmux-navigator.git "$HOME/.config/tmux/plugins/vim-tmux-navigator"
+    echo "  ✓ vim-tmux-navigator installed"
 fi
 
 echo "[7/7] Installing tmux-mem-cpu-load..."
