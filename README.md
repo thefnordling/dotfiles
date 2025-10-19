@@ -28,14 +28,8 @@ This script will:
 - Install zsh, GNU Stow, and tmux
 - Change your default shell to zsh
 - Install powerlevel10k theme
+- Install catppuccin tmux theme
 - Apply shell configurations using GNU Stow
-
-After running the script, install tmux plugins:
-
-```bash
-tmux
-# Press Ctrl-a I (capital i) to install plugins
-```
 
 ### 2. Development Tools Setup
 

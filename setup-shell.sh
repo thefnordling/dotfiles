@@ -12,7 +12,8 @@ echo "  2. Install zsh and GNU Stow"
 echo "  3. Optionally change default shell to zsh"
 echo "  4. Install powerlevel10k"
 echo "  5. Apply dotfiles using GNU Stow"
-echo "  6. Install tmux plugin manager (tpm)"
+echo "  6. Install catppuccin tmux theme"
+echo "  7. Install tmux-mem-cpu-load"
 echo ""
 
 echo "[1/5] Checking for oh-my-zsh..."
@@ -148,14 +149,43 @@ else
 fi
 echo "  ✓ tmux config applied"
 
-echo "[6/6] Installing tmux plugin manager (tpm)..."
-if [ -d "$HOME/.tmux/plugins/tpm" ]; then
-    echo "  → Removing existing tpm installation..."
-    rm -rf "$HOME/.tmux/plugins/tpm"
+echo "[6/6] Installing catppuccin tmux theme..."
+if [ -d "$HOME/.config/tmux/plugins/catppuccin" ]; then
+    echo "  → Updating existing catppuccin theme..."
+    cd "$HOME/.config/tmux/plugins/catppuccin"
+    git pull
+    cd "$SCRIPT_DIR"
+    echo "  ✓ catppuccin theme updated"
+else
+    echo "  → Installing catppuccin theme..."
+    mkdir -p "$HOME/.config/tmux/plugins"
+    git clone https://github.com/catppuccin/tmux.git "$HOME/.config/tmux/plugins/catppuccin"
+    echo "  ✓ catppuccin theme installed"
 fi
-mkdir -p "$HOME/.tmux/plugins"
-git clone https://github.com/tmux-plugins/tpm "$HOME/.tmux/plugins/tpm"
-echo "  ✓ tpm installed"
+
+echo "[7/7] Installing tmux-mem-cpu-load..."
+if command -v tmux-mem-cpu-load &> /dev/null; then
+    echo "  ✓ tmux-mem-cpu-load already installed"
+else
+    echo "  → Installing build dependencies..."
+    sudo apt-get update
+    sudo apt-get install -y cmake build-essential
+    
+    echo "  → Cloning tmux-mem-cpu-load..."
+    TMUX_MEM_DIR="/tmp/tmux-mem-cpu-load-build"
+    rm -rf "$TMUX_MEM_DIR"
+    git clone https://github.com/thewtex/tmux-mem-cpu-load.git "$TMUX_MEM_DIR"
+    
+    echo "  → Building tmux-mem-cpu-load..."
+    cd "$TMUX_MEM_DIR"
+    cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local .
+    make
+    make install
+    
+    cd "$SCRIPT_DIR"
+    rm -rf "$TMUX_MEM_DIR"
+    echo "  ✓ tmux-mem-cpu-load installed"
+fi
 
 echo ""
 echo "=== Setup Complete ==="

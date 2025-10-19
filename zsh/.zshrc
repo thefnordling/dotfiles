@@ -11,3 +11,5 @@ source ~/.local/share/powerlevel10k/powerlevel10k.zsh-theme
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
 [ -s "/home/fnord/.bun/_bun" ] && source "/home/fnord/.bun/_bun"
+
+alias ls='ls --color=auto'
