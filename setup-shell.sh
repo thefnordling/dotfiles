@@ -55,9 +55,16 @@ else
     echo "  ✓ tmux already installed"
 fi
 
+if ! command -v vivid &> /dev/null; then
+    echo "  → vivid not found, will install"
+    NEED_INSTALL=1
+else
+    echo "  ✓ vivid already installed"
+fi
+
 if [ $NEED_INSTALL -eq 1 ]; then
     sudo apt-get update
-    sudo apt-get install -y zsh stow tmux
+    sudo apt-get install -y zsh stow tmux vivid
     echo "  ✓ Installation complete"
 fi
 

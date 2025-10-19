@@ -13,3 +13,4 @@ source ~/.local/share/powerlevel10k/powerlevel10k.zsh-theme
 [ -s "/home/fnord/.bun/_bun" ] && source "/home/fnord/.bun/_bun"
 
 alias ls='ls --color=auto'
+export LS_COLORS="$(vivid generate catppuccin-mocha)"
