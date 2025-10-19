@@ -14,3 +14,7 @@ source ~/.local/share/powerlevel10k/powerlevel10k.zsh-theme
 
 alias ls='ls --color=auto'
 export LS_COLORS="$(vivid generate catppuccin-mocha)"
+
+if [[ -n "$SSH_CONNECTION" ]] && [[ -z "$TMUX" ]] && [[ -z "$SSH_NO_TMUX" ]]; then
+  tmux attach-session -t ssh || tmux new-session -s ssh
+fi
