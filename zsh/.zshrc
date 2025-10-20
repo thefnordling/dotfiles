@@ -30,3 +30,17 @@ preexec() {
 if [[ -n "$SSH_CONNECTION" ]] && [[ -z "$TMUX" ]] && [[ -z "$SSH_NO_TMUX" ]]; then
   exec tmux new-session -A -s ssh || tmux new-session -s ssh
 fi
+
+# GPG_TTY for tmux compatibility
+export GPG_TTY=$(tty)
+gpg-connect-agent updatestartuptty /bye >/dev/null 2>&1
+
+# Update GPG_TTY before each command (critical for tmux)
+if [[ -n "${ZSH_VERSION-}" ]]; then
+    preexec() {
+        export GPG_TTY=$(tty)
+        gpg-connect-agent updatestartuptty /bye >/dev/null 2>&1
+    }
+elif [[ -n "${BASH_VERSION-}" ]]; then
+    PROMPT_COMMAND='export GPG_TTY=$(tty); gpg-connect-agent updatestartuptty /bye >/dev/null 2>&1'
+fi

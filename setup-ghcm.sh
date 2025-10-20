@@ -77,8 +77,6 @@ ok "pass is initialized with ${PRIMARY_KEY_FINGERPRINT}"
 
 # =============== Install Git Credential Manager (dotnet tool) ===============
 run "Installing Git Credential Manager (dotnet global tool)"
-# Make sure current shell can find dotnet global tools right away
-export PATH="$PATH:$HOME/.dotnet/tools"
 dotnet tool install -g git-credential-manager >/dev/null 2>&1 || {
     # If already installed, update quietly
     dotnet tool update -g git-credential-manager
