@@ -132,11 +132,8 @@ EOF
     fi
 }
 
-# Configure for both bash and zsh
+# Configure for bash only (skip .zshrc since it's managed by stow)
 configure_gpg_tty "$HOME/.bashrc"
-if command -v zsh >/dev/null 2>&1; then
-    configure_gpg_tty "$HOME/.zshrc"
-fi
 
 # =============== Configure GCM ===============
 run "Running 'git-credential-manager configure'"
