@@ -98,9 +98,47 @@ append_line() {
 
 append_line 'export PATH="$PATH:$HOME/.dotnet/tools"'
 append_line 'export GCM_CREDENTIAL_STORE="gpg"'
-append_line 'export GPG_TTY=$(tty)'
 append_line 'export REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt'
 ok "Environment exports ensured in ~/.profile"
+
+# =============== Configure GPG_TTY for tmux compatibility ===============
+run "Configuring GPG_TTY for tmux compatibility $emoji_edit"
+configure_gpg_tty() {
+    local rcfile="$1"
+    local marker="# GPG_TTY for tmux compatibility"
+    
+    if [[ ! -f "$rcfile" ]]; then
+        touch "$rcfile"
+    fi
+    
+    if ! grep -qF "$marker" "$rcfile" 2>/dev/null; then
+        cat >> "$rcfile" << 'EOF'
+
+# GPG_TTY for tmux compatibility
+export GPG_TTY=$(tty)
+gpg-connect-agent updatestartuptty /bye >/dev/null 2>&1
+
+# Update GPG_TTY before each command (critical for tmux)
+if [[ -n "${ZSH_VERSION-}" ]]; then
+    preexec() {
+        export GPG_TTY=$(tty)
+        gpg-connect-agent updatestartuptty /bye >/dev/null 2>&1
+    }
+elif [[ -n "${BASH_VERSION-}" ]]; then
+    PROMPT_COMMAND='export GPG_TTY=$(tty); gpg-connect-agent updatestartuptty /bye >/dev/null 2>&1'
+fi
+EOF
+        ok "Added GPG_TTY configuration to $rcfile"
+    else
+        ok "GPG_TTY already configured in $rcfile"
+    fi
+}
+
+# Configure for both bash and zsh
+configure_gpg_tty "$HOME/.bashrc"
+if command -v zsh >/dev/null 2>&1; then
+    configure_gpg_tty "$HOME/.zshrc"
+fi
 
 # =============== Configure GCM ===============
 run "Running 'git-credential-manager configure'"
