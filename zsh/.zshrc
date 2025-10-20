@@ -25,6 +25,6 @@ preexec() {
   gpg-connect-agent updatestartuptty /bye >/dev/null 2>&1
 }
 
-if [[ -n "$SSH_CONNECTION" ]] && [[ -z "$TMUX" ]] && [[ -z "$SSH_NO_TMUX" ]]; then
+if [[ -n "$SSH_CONNECTION" ]] && [[ -z "$TMUX" ]] && [[ -z "$SSH_NO_TMUX" ]] && [[ "$TERM" != "screen"* ]]; then
   exec tmux new-session -A -s ssh || tmux new-session -s ssh
 fi
