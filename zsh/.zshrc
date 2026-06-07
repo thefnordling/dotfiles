@@ -10,7 +10,7 @@ source ~/.local/share/powerlevel10k/powerlevel10k.zsh-theme
 
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
-[ -s "/home/fnord/.bun/_bun" ] && source "/home/fnord/.bun/_bun"
+[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
 alias ls='eza --color=auto --icons --git --group-directories-first'
 export LS_COLORS="$(vivid generate catppuccin-mocha)"
