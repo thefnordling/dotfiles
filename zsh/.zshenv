@@ -11,7 +11,8 @@ export PATH=/usr/local/cuda-12.9/bin:$PATH
 export PATH="$HOME/.opencode/bin:$PATH"
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
-export PATH="$PATH:/usr/local/go/bin"
+export PATH="$PATH:/usr/local/go/bin:$HOME/go/bin"
 
 export EDITOR="nvim"
 export SUDO_EDITOR="$EDITOR"
+. "$HOME/.cargo/env"

@@ -8,4 +8,3 @@ clipboard-write = allow
 clipboard-read = allow
 app-notifications = false
 term = xterm-256color
-command = tmux

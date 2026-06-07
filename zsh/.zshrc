@@ -16,6 +16,7 @@ source ~/.local/share/powerlevel10k/powerlevel10k.zsh-theme
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
 alias ls='eza --color=auto --icons --git --group-directories-first'
+alias fd='fdfind -HI'
 export LS_COLORS="$(vivid generate catppuccin-mocha)"
 
 # GPG_TTY for tmux compatibility
