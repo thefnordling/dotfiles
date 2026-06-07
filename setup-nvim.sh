@@ -134,10 +134,9 @@ if command -v dotnet &> /dev/null && dotnet --list-sdks | grep -q "^10\."; then
     echo "  ✓ .NET 10 SDK already installed (skip)"
 else
     echo "  → Installing .NET 10 SDK..."
+    sudo rm -f /usr/share/keyrings/microsoft-prod.gpg /etc/apt/sources.list.d/microsoft-prod.list
     curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg
-    sudo tee /etc/apt/sources.list.d/microsoft-prod.list >/dev/null <<'EOF'
-deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft-prod.gpg] https://packages.microsoft.com/ubuntu/24.04/prod noble main
-EOF
+    echo 'deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft-prod.gpg] https://packages.microsoft.com/ubuntu/24.04/prod noble main' | sudo tee /etc/apt/sources.list.d/microsoft-prod.list >/dev/null
     sudo apt update
     sudo apt install -y dotnet-sdk-10.0
     echo "  ✓ .NET 10 SDK installed"
