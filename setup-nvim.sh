@@ -15,7 +15,7 @@ echo "[2] Dev packages"
 sudo apt install -y --no-install-recommends git build-essential unzip curl ripgrep fd-find fontconfig make gcc zsh netcat-openbsd
 
 echo "[3] Detect desktop environment"
-if [ -n "$DISPLAY" ] || [ -n "$WAYLAND_DISPLAY" ] || grep -q "Microsoft\|WSL" /proc/version 2>/dev/null; then
+if [ -n "${DISPLAY:-}" ] || [ -n "${WAYLAND_DISPLAY:-}" ] || grep -q "Microsoft\|WSL" /proc/version 2>/dev/null; then
     IS_DESKTOP=true
     echo "  → Desktop environment detected"
 else
