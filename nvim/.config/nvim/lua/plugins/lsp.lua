@@ -36,6 +36,8 @@ local ensure_installed = {
   'yaml-language-server',
   'taplo',
   'bash-language-server',
+  'lua-language-server',
+  'emmet-ls',
 
   -- DAP adapters
   'debugpy',
