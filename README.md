@@ -12,6 +12,17 @@ cd ~/code/dotfiles
 chmod +x *.sh
 ```
 
+## Stowed Packages
+
+| Package | What it manages |
+|---------|----------------|
+| `zsh` | `.zshrc`, `.zshenv`, `.zprofile` |
+| `powerlevel10k` | `.p10k.zsh` + prompt geometry config |
+| `tmux` | `.tmux.conf` |
+| `nvim` | `.config/nvim/` (custom lua config) |
+| `ghostty` | `.config/ghostty/` |
+| `opencode` | `.config/opencode/` |
+
 ## Setup Instructions
 
 Run these scripts in order for a complete development environment setup:
@@ -25,11 +36,13 @@ Run these scripts in order for a complete development environment setup:
 This script will:
 
 - Remove oh-my-zsh if present
-- Install zsh, GNU Stow, and tmux
+- Install zsh, GNU Stow, tmux, vivid, and eza
 - Change your default shell to zsh
 - Install powerlevel10k theme
-- Install catppuccin tmux theme
+- Install catppuccin tmux theme + vim-tmux-navigator
+- Install tmux-mem-cpu-load
 - Apply shell configurations using GNU Stow
+- Create a secrets file at `~/.config/secrets/environment`
 
 ### 2. Development Tools Setup
 
@@ -41,16 +54,24 @@ This script will:
 
 This script will:
 
-- Install Neovim v0.11.3
-- Install development tools (Go, Node via NVM, Python, .NET)
-- Install Meslo Nerd Font
-- Clone kickstart.nvim configuration
+- Install Neovim v0.12.2
+- Install Go v1.26.4
+- Install Node.js via NVM (LTS)
+- Install Python 3
+- Install .NET 10 SDK
+- Install Rust + stylua + taplo-cli
+- Install Meslo Nerd Font (desktop only)
+- Install Ghostty terminal (desktop only)
+- Install neovim config via GNU Stow
+- Configure update-alternatives for vi/vim to point to nvim
 
-# 3. GitHub Credential Manager
+### 3. GitHub Credential Manager
 
 ```bash
 ./setup-ghcm.sh
 ```
+
+Sets up GPG + pass + Git Credential Manager for secure GitHub authentication.
 
 ## Manual Configuration Updates
 
