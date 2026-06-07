@@ -12,7 +12,7 @@ source ~/.local/share/powerlevel10k/powerlevel10k.zsh-theme
 
 [ -s "/home/fnord/.bun/_bun" ] && source "/home/fnord/.bun/_bun"
 
-alias ls='ls --color=auto'
+alias ls='eza --color=auto --icons --git --group-directories-first'
 export LS_COLORS="$(vivid generate catppuccin-mocha)"
 
 # GPG_TTY for tmux compatibility
@@ -28,3 +28,13 @@ preexec() {
 if [[ -n "$SSH_CONNECTION" ]] && [[ -z "$TMUX" ]] && [[ -z "$SSH_NO_TMUX" ]] && [[ "$TERM" != "screen"* ]]; then
   exec tmux new-session -A -s ssh || tmux new-session -s ssh
 fi
+
+# Prefer CUDA 13.0 in this user shell
+export PATH=/usr/local/cuda-13.0/bin:$PATH
+export LD_LIBRARY_PATH=/usr/local/cuda-13.0/lib64:${LD_LIBRARY_PATH}
+
+# KDB-X Installation Configuration - Thu Mar 12 07:40:32 AM PDT 2026
+export QHOME=~/q
+export PATH="$QHOME/l64:$PATH"
+alias q="taskset -c 0-23 rlwrap -r q"
+# End KDB-X Installation Configuration

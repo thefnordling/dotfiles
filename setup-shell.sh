@@ -62,9 +62,16 @@ else
     echo "  ✓ vivid already installed"
 fi
 
+if ! command -v eza &> /dev/null; then
+    echo "  → eza not found, will install"
+    NEED_INSTALL=1
+else
+    echo "  ✓ eza already installed"
+fi
+
 if [ $NEED_INSTALL -eq 1 ]; then
     sudo apt-get update
-    sudo apt-get install -y zsh stow tmux vivid
+    sudo apt-get install -y zsh stow tmux vivid eza
     echo "  ✓ Installation complete"
 fi
 
