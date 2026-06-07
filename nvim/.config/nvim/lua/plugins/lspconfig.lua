@@ -55,7 +55,7 @@ vim.lsp.config('pyright', {
   },
 })
 
-vim.lsp.config('typescript-language-server', {
+vim.lsp.config('ts_ls', {
   settings = {
     typescript = {
       inlayHints = {
@@ -93,18 +93,18 @@ vim.lsp.config('gopls', {
   },
 })
 
-vim.lsp.config('roslyn-language-server', {
+vim.lsp.config('roslyn', {
   settings = {
     ['dotnet.codeAnalysis.ignoredDiagnostics'] = {},
   },
 })
 
-vim.lsp.config('html-lsp', {})
-vim.lsp.config('css-lsp', {})
-vim.lsp.config('json-lsp', {})
-vim.lsp.config('yaml-language-server', {})
+vim.lsp.config('html', {})
+vim.lsp.config('cssls', {})
+vim.lsp.config('jsonls', {})
+vim.lsp.config('yamlls', {})
 vim.lsp.config('taplo', {})
-vim.lsp.config('bash-language-server', {})
+vim.lsp.config('bashls', {})
 
 vim.diagnostic.config({
   severity_sort = true,
