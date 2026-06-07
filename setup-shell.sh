@@ -3,7 +3,7 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BACKUP_DIR="/tmp/shell-backup-$(date +%Y%m%d-%H%M%S)"
+BACKUP_DIR="$HOME/.local/shell-backups/shell-$(date +%Y%m%d-%H%M%S)"
 
 echo "=== Shell Setup Script ==="
 echo "This script will:"
@@ -16,7 +16,7 @@ echo "  6. Install tmux plugins (catppuccin, vim-tmux-navigator)"
 echo "  7. Install tmux-mem-cpu-load"
 echo ""
 
-echo "[1/5] Checking for oh-my-zsh..."
+echo "[1/7] Checking for oh-my-zsh..."
 if [ -d "$HOME/.oh-my-zsh" ]; then
     echo "  → oh-my-zsh detected, uninstalling..."
     
@@ -32,50 +32,23 @@ else
     echo "  ✓ oh-my-zsh not installed (skip)"
 fi
 
-echo "[2/5] Installing zsh and GNU Stow..."
-NEED_INSTALL=0
-if ! command -v zsh &> /dev/null; then
-    echo "  → zsh not found, will install"
-    NEED_INSTALL=1
-else
-    echo "  ✓ zsh already installed"
-fi
+echo "[2/7] Installing zsh and GNU Stow..."
+MISSING_PKGS=""
+for pkg in zsh stow tmux vivid eza; do
+    if ! command -v "$pkg" &> /dev/null; then
+        MISSING_PKGS="$MISSING_PKGS $pkg"
+    fi
+done
 
-if ! command -v stow &> /dev/null; then
-    echo "  → stow not found, will install"
-    NEED_INSTALL=1
-else
-    echo "  ✓ stow already installed"
-fi
-
-if ! command -v tmux &> /dev/null; then
-    echo "  → tmux not found, will install"
-    NEED_INSTALL=1
-else
-    echo "  ✓ tmux already installed"
-fi
-
-if ! command -v vivid &> /dev/null; then
-    echo "  → vivid not found, will install"
-    NEED_INSTALL=1
-else
-    echo "  ✓ vivid already installed"
-fi
-
-if ! command -v eza &> /dev/null; then
-    echo "  → eza not found, will install"
-    NEED_INSTALL=1
-else
-    echo "  ✓ eza already installed"
-fi
-
-if [ $NEED_INSTALL -eq 1 ]; then
+if [ -n "$MISSING_PKGS" ]; then
     sudo apt-get update
-    sudo apt-get install -y zsh stow tmux vivid eza
+    sudo apt-get install -y $MISSING_PKGS
     echo "  ✓ Installation complete"
+else
+    echo "  ✓ All packages already installed"
 fi
 
-echo "[3/5] Changing default shell to zsh..."
+echo "[3/7] Changing default shell to zsh..."
 CURRENT_SHELL=$(getent passwd "$USER" | cut -d: -f7)
 ZSH_PATH=$(which zsh)
 
@@ -98,21 +71,29 @@ else
     fi
 fi
 
-echo "[4/5] Installing powerlevel10k..."
+echo "[4/7] Installing powerlevel10k..."
 P10K_DIR="$HOME/.local/share/powerlevel10k"
-if [ -d "$P10K_DIR" ]; then
-    echo "  → powerlevel10k already exists, updating..."
-    cd "$P10K_DIR"
-    git pull
-    echo "  ✓ powerlevel10k updated"
-else
-    echo "  → Cloning powerlevel10k..."
-    mkdir -p "$HOME/.local/share"
-    git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$P10K_DIR"
-    echo "  ✓ powerlevel10k installed"
-fi
+    if [ -d "$P10K_DIR" ]; then
+        echo "  → powerlevel10k already exists, updating..."
+        if [ -f "$P10K_DIR/.git" ]; then
+            (cd "$P10K_DIR" && git fetch --unshallow 2>/dev/null || true && git pull) || echo "  → powerlevel10k update skipped"
+        fi
+        echo "  ✓ powerlevel10k checked"
+    else
+        echo "  → Cloning powerlevel10k..."
+        mkdir -p "$HOME/.local/share"
+        git clone https://github.com/romkatv/powerlevel10k.git "$P10K_DIR"
+        echo "  ✓ powerlevel10k installed"
+    fi
 
-echo "[5/5] Applying dotfiles with GNU Stow..."
+echo "[5/7] Applying dotfiles with GNU Stow..."
+
+for pkg in zsh powerlevel10k tmux; do
+    if [ ! -d "$SCRIPT_DIR/$pkg" ]; then
+        echo "Error: stow package '$pkg' not found in $SCRIPT_DIR"
+        exit 1
+    fi
+done
 
 for config in .zshrc .zshenv .zprofile; do
     if [ -f "$HOME/$config" ] && [ ! -L "$HOME/$config" ]; then
@@ -136,42 +117,60 @@ fi
 
 cd "$SCRIPT_DIR"
 
+_stow_hide_steam_symlinks() {
+    mkdir -p /tmp/stow-steam-backup
+    [ -L "$HOME/.steampid" ] && mv "$HOME/.steampid" /tmp/stow-steam-backup/ 2>/dev/null || true
+    [ -L "$HOME/.steampath" ] && mv "$HOME/.steampath" /tmp/stow-steam-backup/ 2>/dev/null || true
+}
+
+_stow_restore_steam_symlinks() {
+    [ -L /tmp/stow-steam-backup/.steampid ] && mv /tmp/stow-steam-backup/.steampid "$HOME/" 2>/dev/null || true
+    [ -L /tmp/stow-steam-backup/.steampath ] && mv /tmp/stow-steam-backup/.steampath "$HOME/" 2>/dev/null || true
+    rmdir /tmp/stow-steam-backup 2>/dev/null || true
+}
+
 if [ -L "$HOME/.zshrc" ]; then
     echo "  → Restowing zsh package..."
-    stow -t ~ -R zsh
+    _stow_hide_steam_symlinks
+    stow -d "$SCRIPT_DIR" -t "$HOME" -R zsh
+    _stow_restore_steam_symlinks
 else
     echo "  → Stowing zsh package..."
-    stow -t ~ zsh
+    stow -d "$SCRIPT_DIR" -t "$HOME" zsh
 fi
 echo "  ✓ zsh configs applied"
 
 if [ -L "$HOME/.p10k.zsh" ]; then
     echo "  → Restowing powerlevel10k package..."
-    stow -t ~ -R powerlevel10k
+    _stow_hide_steam_symlinks
+    stow -d "$SCRIPT_DIR" -t "$HOME" -R powerlevel10k
+    _stow_restore_steam_symlinks
 else
     echo "  → Stowing powerlevel10k package..."
-    stow -t ~ powerlevel10k
+    stow -d "$SCRIPT_DIR" -t "$HOME" powerlevel10k
 fi
 echo "  ✓ powerlevel10k config applied"
 
 if [ -L "$HOME/.tmux.conf" ]; then
     echo "  → Restowing tmux package..."
-    stow -t ~ -R tmux
+    _stow_hide_steam_symlinks
+    stow -d "$SCRIPT_DIR" -t "$HOME" -R tmux
+    _stow_restore_steam_symlinks
 else
     echo "  → Stowing tmux package..."
-    stow -t ~ tmux
+    stow -d "$SCRIPT_DIR" -t "$HOME" tmux
 fi
 echo "  ✓ tmux config applied"
 
-echo "[6/6] Installing tmux plugins..."
+echo "[6/7] Installing tmux plugins..."
 mkdir -p "$HOME/.config/tmux/plugins"
 
 if [ -d "$HOME/.config/tmux/plugins/catppuccin" ]; then
     echo "  → Updating existing catppuccin theme..."
-    cd "$HOME/.config/tmux/plugins/catppuccin"
-    git pull
-    cd "$SCRIPT_DIR"
-    echo "  ✓ catppuccin theme updated"
+    if [ -f "$HOME/.config/tmux/plugins/catppuccin/.git" ]; then
+        (cd "$HOME/.config/tmux/plugins/catppuccin" && git fetch --unshallow 2>/dev/null || true && git pull) || echo "  → catppuccin update skipped"
+    fi
+    echo "  ✓ catppuccin theme checked"
 else
     echo "  → Installing catppuccin theme..."
     git clone https://github.com/catppuccin/tmux.git "$HOME/.config/tmux/plugins/catppuccin"
@@ -180,10 +179,10 @@ fi
 
 if [ -d "$HOME/.config/tmux/plugins/vim-tmux-navigator" ]; then
     echo "  → Updating existing vim-tmux-navigator..."
-    cd "$HOME/.config/tmux/plugins/vim-tmux-navigator"
-    git pull
-    cd "$SCRIPT_DIR"
-    echo "  ✓ vim-tmux-navigator updated"
+    if [ -f "$HOME/.config/tmux/plugins/vim-tmux-navigator/.git" ]; then
+        (cd "$HOME/.config/tmux/plugins/vim-tmux-navigator" && git fetch --unshallow 2>/dev/null || true && git pull) || echo "  → vim-tmux-navigator update skipped"
+    fi
+    echo "  ✓ vim-tmux-navigator checked"
 else
     echo "  → Installing vim-tmux-navigator..."
     git clone https://github.com/christoomey/vim-tmux-navigator.git "$HOME/.config/tmux/plugins/vim-tmux-navigator"
@@ -191,27 +190,38 @@ else
 fi
 
 echo "[7/7] Installing tmux-mem-cpu-load..."
-if command -v tmux-mem-cpu-load &> /dev/null; then
+if [ -x "$HOME/.local/bin/tmux-mem-cpu-load" ]; then
     echo "  ✓ tmux-mem-cpu-load already installed"
 else
     echo "  → Installing build dependencies..."
-    sudo apt-get update
-    sudo apt-get install -y cmake build-essential
-    
+    MISSING_BUILD_PKGS=""
+    for pkg in cmake gcc g++ make; do
+        if ! command -v "$pkg" &> /dev/null; then
+            MISSING_BUILD_PKGS="$MISSING_BUILD_PKGS $pkg"
+        fi
+    done
+
+    if [ -n "$MISSING_BUILD_PKGS" ]; then
+        sudo apt-get update
+        sudo apt-get install -y $MISSING_BUILD_PKGS
+    fi
+
     echo "  → Cloning tmux-mem-cpu-load..."
     TMUX_MEM_DIR="/tmp/tmux-mem-cpu-load-build"
     rm -rf "$TMUX_MEM_DIR"
     git clone https://github.com/thewtex/tmux-mem-cpu-load.git "$TMUX_MEM_DIR"
-    
+
     echo "  → Building tmux-mem-cpu-load..."
-    cd "$TMUX_MEM_DIR"
-    cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local .
-    make
-    make install
-    
-    cd "$SCRIPT_DIR"
+    (cd "$TMUX_MEM_DIR" && cmake -DCMAKE_INSTALL_PREFIX="$HOME/.local" . && make && make install) || {
+        echo "  → Build failed, skipping"
+    }
+
     rm -rf "$TMUX_MEM_DIR"
-    echo "  ✓ tmux-mem-cpu-load installed"
+    if [ -x "$HOME/.local/bin/tmux-mem-cpu-load" ]; then
+        echo "  ✓ tmux-mem-cpu-load installed"
+    else
+        echo "  → tmux-mem-cpu-load installation skipped"
+    fi
 fi
 
 echo ""
