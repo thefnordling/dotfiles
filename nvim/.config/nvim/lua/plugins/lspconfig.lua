@@ -105,6 +105,9 @@ vim.lsp.config('jsonls', {})
 vim.lsp.config('yamlls', {})
 vim.lsp.config('taplo', {})
 vim.lsp.config('bashls', {})
+vim.lsp.config('lua_ls', {})
+vim.lsp.config('emmet_ls', {})
+
 
 vim.diagnostic.config({
   severity_sort = true,
