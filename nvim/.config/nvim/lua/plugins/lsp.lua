@@ -50,6 +50,10 @@ local ensure_installed = {
   'ruff',
   'csharpier',
   'shfmt',
+
+  -- Linters (discovered by nvim-lint)
+  'eslint_d',
+  'markdownlint',
 }
 
 require('mason-tool-installer').setup({
