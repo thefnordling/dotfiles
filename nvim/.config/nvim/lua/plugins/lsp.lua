@@ -52,6 +52,7 @@ local ensure_installed = {
   'shfmt',
 
   -- Linters (discovered by nvim-lint)
+  'shellcheck',
   'eslint_d',
   'markdownlint',
 }

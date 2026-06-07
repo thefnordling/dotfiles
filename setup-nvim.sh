@@ -12,7 +12,7 @@ sudo apt remove -y vim vim-tiny vi neovim nodejs libnode-dev libnode109 || true
 sudo apt autoremove -y || true
 
 echo "[2] Dev packages"
-sudo apt install -y --no-install-recommends git build-essential unzip curl ripgrep fd-find fontconfig make gcc zsh netcat-openbsd
+sudo apt install -y --no-install-recommends git build-essential unzip curl ripgrep fd-find fontconfig make gcc zsh netcat-openbsd shellcheck
 
 echo "[3] Detect desktop environment"
 if [ -n "${DISPLAY:-}" ] || [ -n "${WAYLAND_DISPLAY:-}" ] || grep -q "Microsoft\|WSL" /proc/version 2>/dev/null; then
@@ -108,6 +108,16 @@ if ! command -v go >/dev/null 2>&1; then
     exit 1
 fi
 echo "Go installed: $(go version)"
+
+gopath_bin="$HOME/go/bin"
+mkdir -p "$gopath_bin"
+if [ ! -x "$gopath_bin/goimports" ]; then
+    echo "  → Installing goimports..."
+    go install golang.org/x/tools/cmd/goimports@latest
+    echo "  ✓ goimports installed"
+else
+    echo "  ✓ goimports already installed (skip)"
+fi
 
 echo "[8] nvm + Node LTS"
 export NVM_DIR="$HOME/.nvm"
