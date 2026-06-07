@@ -49,8 +49,11 @@ local ensure_installed = {
   'taplo',
   'ruff',
   'csharpier',
-  'shellcheck',
   'shfmt',
+
+  -- Linters (discovered by nvim-lint)
+  'eslint_d',
+  'markdownlint',
 }
 
 require('mason-tool-installer').setup({
