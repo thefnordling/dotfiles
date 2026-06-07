@@ -14,6 +14,7 @@ echo "  4. Install powerlevel10k"
 echo "  5. Apply dotfiles using GNU Stow"
 echo "  6. Install tmux plugins (catppuccin, vim-tmux-navigator)"
 echo "  7. Install tmux-mem-cpu-load"
+echo "  8. Create secrets file for local environment"
 echo ""
 
 echo "[1/7] Checking for oh-my-zsh..."
@@ -189,7 +190,7 @@ else
     echo "  ✓ vim-tmux-navigator installed"
 fi
 
-echo "[7/7] Installing tmux-mem-cpu-load..."
+echo "[7/8] Installing tmux-mem-cpu-load..."
 if [ -x "$HOME/.local/bin/tmux-mem-cpu-load" ]; then
     echo "  ✓ tmux-mem-cpu-load already installed"
 else
@@ -221,6 +222,36 @@ else
         echo "  ✓ tmux-mem-cpu-load installed"
     else
         echo "  → tmux-mem-cpu-load installation skipped"
+    fi
+fi
+
+echo "[8/8] Setting up secrets file..."
+SECRETS_DIR="$HOME/.config/secrets"
+SECRETS_FILE="$SECRETS_DIR/environment"
+if [ -f "$SECRETS_FILE" ]; then
+    echo "  ✓ secrets file already exists (skip)"
+else
+    if [ -d "$SECRETS_DIR" ] && [ ! -x "$SECRETS_DIR" ]; then
+        echo "  → WARNING: $SECRETS_DIR has restricted permissions, attempting to fix..."
+        chmod 700 "$SECRETS_DIR" 2>/dev/null || sudo chmod 700 "$SECRETS_DIR" 2>/dev/null || {
+            echo "  → ERROR: Cannot fix permissions on $SECRETS_DIR"
+            echo "  → Please run: chmod 700 ~/.config/secrets"
+            echo "  → Skipping secrets file creation"
+        }
+    fi
+    if [ -x "$SECRETS_DIR" ]; then
+        touch "$SECRETS_FILE"
+        chmod 600 "$SECRETS_FILE"
+        cat >> "$SECRETS_FILE" << 'EOF'
+# Secrets and local environment variables
+# This file is NOT tracked in dotfiles - add your private keys, API tokens, etc. here
+#
+# Example:
+# export OPENAI_API_KEY="sk-..."
+# export ANTHROPIC_API_KEY="sk-ant-..."
+
+EOF
+        echo "  → Created $SECRETS_FILE (add your secrets here)"
     fi
 fi
 
