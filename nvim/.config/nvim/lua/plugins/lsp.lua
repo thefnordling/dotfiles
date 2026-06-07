@@ -52,6 +52,7 @@ local ensure_installed = {
   'shfmt',
 
   -- Linters (discovered by nvim-lint)
+  'ruff',
   'shellcheck',
   'eslint_d',
   'markdownlint',
@@ -77,6 +78,7 @@ lint.linters_by_ft = {
   typescriptreact = { 'eslint_d' },
   javascript = { 'eslint_d' },
   javascriptreact = { 'eslint_d' },
+  python = { 'ruff' },
   sh = { 'shellcheck' },
   bash = { 'shellcheck' },
   zsh = { 'shellcheck' },

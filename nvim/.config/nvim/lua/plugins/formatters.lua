@@ -18,7 +18,7 @@ require('conform').setup({
   end,
   formatters_by_ft = {
     lua = { 'stylua' },
-    python = { 'ruff' },
+    python = { 'ruff_format' },
     cs = { 'csharpier' },
     typescript = { 'prettier' },
     typescriptreact = { 'prettier' },
