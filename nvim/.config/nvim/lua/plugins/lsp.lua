@@ -47,9 +47,9 @@ local ensure_installed = {
   'prettier',
   'stylua',
   'taplo',
-  'ruff',
+  'black',
+  'isort',
   'csharpier',
-  'shellcheck',
   'shfmt',
 }
 
