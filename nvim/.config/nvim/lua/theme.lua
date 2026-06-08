@@ -10,6 +10,7 @@ require('catppuccin').setup({
     treesitter = true,
     telescope = true,
     render_markdown = true,
+    bufferline = true,
   },
 })
 

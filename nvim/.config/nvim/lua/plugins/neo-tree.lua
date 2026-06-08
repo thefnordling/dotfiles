@@ -17,12 +17,7 @@ require('neo-tree').setup({
   trim_whitespace_on_save = true,
   sort_case_insensitive = true,
   source_selector = {
-    winbar = true,
     statusline = false,
-    sources = {
-      { source = 'filesystem' },
-      { source = 'buffers' },
-    },
   },
   window = {
     position = 'left',

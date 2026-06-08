@@ -14,14 +14,14 @@ chmod +x *.sh
 
 ## Stowed Packages
 
-| Package | What it manages |
-|---------|----------------|
-| `zsh` | `.zshrc`, `.zshenv`, `.zprofile` |
+| Package         | What it manages                      |
+| --------------- | ------------------------------------ |
+| `zsh`           | `.zshrc`, `.zshenv`, `.zprofile`     |
 | `powerlevel10k` | `.p10k.zsh` + prompt geometry config |
-| `tmux` | `.tmux.conf` |
-| `nvim` | `.config/nvim/` (custom lua config) |
-| `ghostty` | `.config/ghostty/` |
-| `opencode` | `.config/opencode/` |
+| `tmux`          | `.tmux.conf`                         |
+| `nvim`          | `.config/nvim/` (custom lua config)  |
+| `ghostty`       | `.config/ghostty/`                   |
+| `opencode`      | `.config/opencode/`                  |
 
 ## Setup Instructions
 

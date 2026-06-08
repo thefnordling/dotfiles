@@ -54,3 +54,6 @@ require('plugins.neo-tree')
 
 -- OSC52 clipboard: copy to system clipboard via terminal
 require('plugins.osc52')
+
+-- Buffer tabs: bufferline with catppuccin theme and file icons
+require('plugins.bufferline')
