@@ -163,7 +163,33 @@ fi
 . "$HOME/.cargo/env"
 cargo install stylua taplo-cli
 
-echo "[12] Deploy neovim config via stow"
+echo "[12] Clear neovim cache and plugin files"
+NVIM_CACHE_DIRS=(
+    "$HOME/.cache/nvim"
+    "$HOME/.local/share/nvim"
+    "$HOME/.local/state/nvim"
+    "$HOME/.config/nvim/plugin"
+)
+for dir in "${NVIM_CACHE_DIRS[@]}"; do
+    if [ -d "$dir" ]; then
+        rm -rf "$dir"
+        echo "  → Cleared $dir"
+    fi
+done
+
+NVIM_LOCKFILES=(
+    "$HOME/.config/nvim/lazy-lock.json"
+    "$HOME/.config/nvim/strict-lock.json"
+)
+for lockfile in "${NVIM_LOCKFILES[@]}"; do
+    if [ -f "$lockfile" ]; then
+        rm -f "$lockfile"
+        echo "  → Removed $lockfile"
+    fi
+done
+echo "  ✓ Neovim cache cleared"
+
+echo "[13] Deploy neovim config via stow"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [ -d "$SCRIPT_DIR/nvim" ]; then
     if [ -L "$HOME/.config/nvim" ]; then
@@ -183,7 +209,7 @@ else
     echo "  → No nvim package in dotfiles (skip)"
 fi
 
-echo "[13] Verify essentials"
+echo "[14] Verify essentials"
 for b in nvim vi vim rg git go node npm dotnet python3 rustc cargo; do
     if command -v "$b" >/dev/null 2>&1; then
         printf '  %-12s: OK\n' "$b"

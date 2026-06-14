@@ -9,7 +9,7 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 
-source ~/.local/share/powerlevel10k/powerlevel10k.zsh-theme
+[ -f "$HOME/.local/share/powerlevel10k/powerlevel10k.zsh-theme" ] && source "$HOME/.local/share/powerlevel10k/powerlevel10k.zsh-theme"
 
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 

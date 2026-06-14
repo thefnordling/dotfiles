@@ -15,4 +15,4 @@ export PATH="$PATH:/usr/local/go/bin:$HOME/go/bin"
 
 export EDITOR="nvim"
 export SUDO_EDITOR="$EDITOR"
-. "$HOME/.cargo/env"
+[ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
