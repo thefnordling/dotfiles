@@ -7,7 +7,11 @@ if [ -d "$HOME/.local/bin" ] ; then
 fi
 
 export PATH="$PATH:$HOME/.dotnet/tools"
-export PATH=/usr/local/cuda-12.9/bin:$PATH
+
+case "$(uname -s)" in
+  Linux) export PATH=/usr/local/cuda-12.9/bin:$PATH ;;
+esac
+
 export PATH="$HOME/.opencode/bin:$PATH"
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"

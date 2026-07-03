@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+OS="$(uname -s)"
+is_macos() { [ "$OS" = "Darwin" ]; }
+
 # =============== UI helpers ===============
 emoji_info="ℹ️"
 emoji_ok="✅"
@@ -23,22 +26,31 @@ die() {
 
 trap 'die "An error occurred. Check the output above."' ERR
 
-# =============== Sanity checks ===============
-if [[ $EUID -ne 0 ]]; then
-    if command -v sudo >/dev/null 2>&1; then
-        SUDO="sudo"
-    else
-        die "This script needs root privileges for apt operations. Please run as root or install sudo."
-    fi
-else
-    SUDO=""
-fi
-
 # =============== Install packages ===============
-run "Updating apt and installing dependencies: dotnet-sdk-8.0, git, gpg, pass $emoji_box"
-export DEBIAN_FRONTEND=noninteractive
-$SUDO apt-get update -y
-$SUDO apt-get install -y dotnet-sdk-8.0 git gpg pass
+if is_macos; then
+    run "Installing dependencies via Homebrew: dotnet, gpg, pass $emoji_box"
+    for pkg in dotnet gnupg pass; do
+        if brew list "$pkg" &>/dev/null 2>&1; then
+            ok "$pkg already installed"
+        else
+            echo y | CI=1 HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_INSTALL_CLEANUP=1 brew install "$pkg"
+        fi
+    done
+else
+    if [[ $EUID -ne 0 ]]; then
+        if command -v sudo >/dev/null 2>&1; then
+            SUDO="sudo"
+        else
+            die "This script needs root privileges for apt operations. Please run as root or install sudo."
+        fi
+    else
+        SUDO=""
+    fi
+    run "Updating apt and installing dependencies: dotnet-sdk-8.0, git, gpg, pass $emoji_box"
+    export DEBIAN_FRONTEND=noninteractive
+    $SUDO apt-get update -y
+    $SUDO apt-get install -y dotnet-sdk-8.0 git gpg pass
+fi
 ok "Packages installed"
 
 # =============== Configure Git to use GCM with GPG-backed pass ===============
@@ -96,7 +108,11 @@ append_line() {
 
 append_line 'export PATH="$PATH:$HOME/.dotnet/tools"'
 append_line 'export GCM_CREDENTIAL_STORE="gpg"'
-append_line 'export REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt'
+if is_macos; then
+    append_line 'export REQUESTS_CA_BUNDLE=/etc/ssl/cert.pem'
+else
+    append_line 'export REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt'
+fi
 ok "Environment exports ensured in ~/.profile"
 
 # =============== Configure GPG_TTY for tmux compatibility ===============

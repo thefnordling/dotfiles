@@ -5,6 +5,8 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKUP_DIR="$HOME/.local/shell-backups/shell-$(date +%Y%m%d-%H%M%S)"
 
+OS="$(uname -s)"
+
 echo "=== Shell Setup Script ==="
 echo "This script will:"
 echo "  1. Uninstall oh-my-zsh (if present)"
@@ -12,12 +14,49 @@ echo "  2. Install zsh and GNU Stow"
 echo "  3. Optionally change default shell to zsh"
 echo "  4. Install powerlevel10k"
 echo "  5. Apply dotfiles using GNU Stow"
-echo "  6. Install tmux plugins (catppuccin, vim-tmux-navigator)"
-echo "  7. Install tmux-mem-cpu-load"
-echo "  8. Create secrets file for local environment"
+echo "  6. Install Nerd Font (macOS only, for powerlevel10k / eza icons)"
+echo "  7. Install tmux plugins (catppuccin, vim-tmux-navigator)"
+echo "  8. Install tmux-mem-cpu-load"
+echo "  9. Create secrets file for local environment"
 echo ""
 
-echo "[1/7] Checking for oh-my-zsh..."
+# ---------------------------------------------------------------------------
+# OS helpers
+# ---------------------------------------------------------------------------
+is_macos() { [ "$OS" = "Darwin" ]; }
+is_linux() { [ "$OS" = "Linux" ]; }
+
+brew_install() {
+    local pkg="$1"
+    if brew list "$pkg" &>/dev/null 2>&1; then
+        echo "  ✓ $pkg already installed"
+    else
+        echo "  → Installing $pkg..."
+        echo y | CI=1 HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_INSTALL_CLEANUP=1 brew install "$pkg"
+    fi
+}
+
+apt_install() {
+    local pkgs="$1"
+    sudo apt-get update
+    sudo apt-get install -y $pkgs
+}
+
+# ---------------------------------------------------------------------------
+# Detect / auto-install Homebrew on macOS
+# ---------------------------------------------------------------------------
+ensure_brew() {
+    if ! command -v brew &>/dev/null; then
+        echo "  → Homebrew not found. Installing Homebrew..."
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        # Apple Silicon default path
+        if [ -f /opt/homebrew/bin/brew ]; then
+            eval "$(/opt/homebrew/bin/brew shellenv)"
+        fi
+    fi
+}
+
+echo "[1/8] Checking for oh-my-zsh..."
 if [ -d "$HOME/.oh-my-zsh" ]; then
     echo "  → oh-my-zsh detected, uninstalling..."
     
@@ -33,46 +72,61 @@ else
     echo "  ✓ oh-my-zsh not installed (skip)"
 fi
 
-echo "[2/7] Installing zsh and GNU Stow..."
-MISSING_PKGS=""
-for pkg in zsh stow tmux vivid eza; do
-    if ! command -v "$pkg" &> /dev/null; then
-        MISSING_PKGS="$MISSING_PKGS $pkg"
-    fi
-done
+echo "[2/8] Installing zsh and GNU Stow..."
+if is_macos; then
+    ensure_brew
 
-if [ -n "$MISSING_PKGS" ]; then
-    sudo apt-get update
-    sudo apt-get install -y $MISSING_PKGS
-    echo "  ✓ Installation complete"
+    # On macOS, brew zsh may not be in PATH yet; detect via brew --prefix
+    if ! command -v zsh &>/dev/null || [ "$(which zsh 2>/dev/null)" = "/bin/zsh" ]; then
+        brew_install zsh
+    fi
+    for pkg in stow tmux vivid eza fd; do
+        brew_install "$pkg"
+    done
 else
-    echo "  ✓ All packages already installed"
+    MISSING_PKGS=""
+    for pkg in zsh stow tmux vivid eza fd; do
+        if ! command -v "$pkg" &> /dev/null; then
+            MISSING_PKGS="$MISSING_PKGS $pkg"
+        fi
+    done
+    if [ -n "$MISSING_PKGS" ]; then
+        apt_install "$MISSING_PKGS"
+        echo "  ✓ Installation complete"
+    else
+        echo "  ✓ All packages already installed"
+    fi
 fi
 
-echo "[3/7] Changing default shell to zsh..."
-CURRENT_SHELL=$(getent passwd "$USER" | cut -d: -f7)
-ZSH_PATH=$(which zsh)
+echo "[3/8] Changing default shell to zsh..."
+if is_macos; then
+    CURRENT_SHELL=$(dscl . -read "/Users/$USER" UserShell | awk '{print $2}')
+    ZSH_PATH="$(brew --prefix)/bin/zsh"
+else
+    CURRENT_SHELL=$(getent passwd "$USER" | cut -d: -f7)
+    ZSH_PATH=$(which zsh)
+fi
 
 if [ "$CURRENT_SHELL" = "$ZSH_PATH" ]; then
     echo "  ✓ Default shell already zsh (skip)"
 else
     echo "  Current shell: $CURRENT_SHELL"
     echo "  Target shell: $ZSH_PATH"
-    read -p "  Change default shell to zsh? (y/n): " -n 1 -r
+    read -p "  Change default shell to $ZSH_PATH? (y/n): " -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
-        echo "  → Changing default shell to zsh..."
+        echo "  → Changing default shell to $ZSH_PATH..."
         if ! grep -q "^$ZSH_PATH$" /etc/shells; then
             echo "$ZSH_PATH" | sudo tee -a /etc/shells
         fi
         chsh -s "$ZSH_PATH"
-        echo "  ✓ Default shell changed to zsh (restart session to take effect)"
+        echo "  ✓ Default shell changed to $ZSH_PATH (restart session to take effect)"
     else
         echo "  ✓ Keeping current shell"
     fi
 fi
 
-echo "[4/7] Installing powerlevel10k..."
+echo "[4/8] Installing powerlevel10k..."
 P10K_DIR="$HOME/.local/share/powerlevel10k"
     if [ -d "$P10K_DIR" ]; then
         echo "  → powerlevel10k already exists, updating..."
@@ -87,7 +141,7 @@ P10K_DIR="$HOME/.local/share/powerlevel10k"
         echo "  ✓ powerlevel10k installed"
     fi
 
-echo "[5/7] Applying dotfiles with GNU Stow..."
+echo "[5/8] Applying dotfiles with GNU Stow..."
 
 for pkg in zsh powerlevel10k tmux; do
     if [ ! -d "$SCRIPT_DIR/$pkg" ]; then
@@ -163,7 +217,7 @@ else
 fi
 echo "  ✓ tmux config applied"
 
-echo "[6/7] Installing tmux plugins..."
+echo "[6/8] Installing tmux plugins..."
 mkdir -p "$HOME/.config/tmux/plugins"
 
 if [ -d "$HOME/.config/tmux/plugins/catppuccin" ]; then
@@ -190,42 +244,80 @@ else
     echo "  ✓ vim-tmux-navigator installed"
 fi
 
-echo "[7/8] Installing tmux-mem-cpu-load..."
+echo "[7/9] Installing Nerd Font for powerlevel10k and eza icons..."
+if is_macos; then
+    ensure_brew
+    FONT_NAME="font-meslo-lg-nerd-font"
+    if brew list --cask "$FONT_NAME" &>/dev/null 2>&1; then
+        echo "  ✓ Meslo Nerd Font already installed"
+    else
+        echo "  → Installing Meslo Nerd Font..."
+        echo y | CI=1 HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_INSTALL_CLEANUP=1 brew install --cask "$FONT_NAME"
+        echo "  ✓ Meslo Nerd Font installed. Set your terminal font to 'MesloLGS NF Regular'."
+    fi
+
+    if ! brew list --cask supercmdlabs/supercmd/supercmd &>/dev/null 2>&1; then
+        echo "  → Installing SuperCmd launcher..."
+        echo y | CI=1 HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_INSTALL_CLEANUP=1 brew install --cask supercmdlabs/supercmd/supercmd
+        echo "  ✓ SuperCmd installed"
+    else
+        echo "  ✓ SuperCmd already installed"
+    fi
+else
+    echo "  → Nerd Font installation via script is not supported on Linux."
+    echo "  → Install manually (e.g. 'sudo apt install fonts-firacode' or download Meslo from Nerd Fonts site)."
+fi
+
+echo "[8/9] Installing tmux-mem-cpu-load..."
+
 if [ -x "$HOME/.local/bin/tmux-mem-cpu-load" ]; then
     echo "  ✓ tmux-mem-cpu-load already installed"
 else
     echo "  → Installing build dependencies..."
-    MISSING_BUILD_PKGS=""
-    for pkg in cmake gcc g++ make; do
-        if ! command -v "$pkg" &> /dev/null; then
-            MISSING_BUILD_PKGS="$MISSING_BUILD_PKGS $pkg"
-        fi
-    done
 
-    if [ -n "$MISSING_BUILD_PKGS" ]; then
-        sudo apt-get update
-        sudo apt-get install -y $MISSING_BUILD_PKGS
+    if is_macos; then
+        # Xcode CLT provides clang (which aliases gcc/g++), make, etc.
+        if ! xcode-select -p &>/dev/null; then
+            echo "  → Xcode Command Line Tools not found. Run 'xcode-select --install' first, then re-run this script."
+            echo "  → Skipping tmux-mem-cpu-load for now."
+        else
+            brew_install cmake
+            _do_build=true
+        fi
+    else
+        MISSING_BUILD_PKGS=""
+        for pkg in cmake gcc g++ make; do
+            if ! command -v "$pkg" &> /dev/null; then
+                MISSING_BUILD_PKGS="$MISSING_BUILD_PKGS $pkg"
+            fi
+        done
+        if [ -n "$MISSING_BUILD_PKGS" ]; then
+            apt_install "$MISSING_BUILD_PKGS"
+        fi
+        _do_build=true
     fi
 
-    echo "  → Cloning tmux-mem-cpu-load..."
-    TMUX_MEM_DIR="/tmp/tmux-mem-cpu-load-build"
-    rm -rf "$TMUX_MEM_DIR"
-    git clone https://github.com/thewtex/tmux-mem-cpu-load.git "$TMUX_MEM_DIR"
+    if [ "${_do_build:-false}" = true ]; then
+        echo "  → Cloning tmux-mem-cpu-load..."
+        TMUX_MEM_DIR="/tmp/tmux-mem-cpu-load-build"
+        rm -rf "$TMUX_MEM_DIR"
+        git clone https://github.com/thewtex/tmux-mem-cpu-load.git "$TMUX_MEM_DIR"
 
-    echo "  → Building tmux-mem-cpu-load..."
-    (cd "$TMUX_MEM_DIR" && cmake -DCMAKE_INSTALL_PREFIX="$HOME/.local" . && make && make install) || {
-        echo "  → Build failed, skipping"
-    }
+        echo "  → Building tmux-mem-cpu-load..."
+        (cd "$TMUX_MEM_DIR" && cmake -DCMAKE_INSTALL_PREFIX="$HOME/.local" . && make && make install) || {
+            echo "  → Build failed, skipping"
+        }
 
-    rm -rf "$TMUX_MEM_DIR"
-    if [ -x "$HOME/.local/bin/tmux-mem-cpu-load" ]; then
-        echo "  ✓ tmux-mem-cpu-load installed"
-    else
-        echo "  → tmux-mem-cpu-load installation skipped"
+        rm -rf "$TMUX_MEM_DIR"
+        if [ -x "$HOME/.local/bin/tmux-mem-cpu-load" ]; then
+            echo "  ✓ tmux-mem-cpu-load installed"
+        else
+            echo "  → tmux-mem-cpu-load installation skipped"
+        fi
     fi
 fi
 
-echo "[8/8] Setting up secrets file..."
+echo "[9/9] Setting up secrets file..."
 SECRETS_DIR="$HOME/.config/secrets"
 SECRETS_FILE="$SECRETS_DIR/environment"
 if [ -f "$SECRETS_FILE" ]; then
