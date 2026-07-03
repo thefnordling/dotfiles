@@ -43,10 +43,6 @@ preexec() {
   gpg-connect-agent updatestartuptty /bye >/dev/null 2>&1
 }
 
-if [[ -n "$SSH_CONNECTION" ]] && [[ -z "$TMUX" ]] && [[ -z "$SSH_NO_TMUX" ]] && [[ "$TERM" != "screen"* ]]; then
-  exec tmux new-session -A -s ssh || tmux new-session -s ssh
-fi
-
 # Linux-only: CUDA paths
 case "$(uname -s)" in
   Linux)
@@ -64,3 +60,7 @@ case "$(uname -s)" in
   Darwin) alias q="rlwrap -r q" ;;
 esac
 # End KDB-X Installation Configuration
+
+if [[ -n "$SSH_CONNECTION" ]] && [[ -z "$TMUX" ]] && [[ -z "$SSH_NO_TMUX" ]] && [[ "$TERM" != "screen"* ]]; then
+  tmux new-session -A -s ssh || tmux new-session -s ssh
+fi
