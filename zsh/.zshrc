@@ -5,6 +5,9 @@ fi
 # Source secrets (not tracked in dotfiles)
 [ -f "$HOME/.config/secrets/environment" ] && source "$HOME/.config/secrets/environment"
 
+# macOS-specific config (stowed via darwin/ package, absent on Linux)
+[ -f "$HOME/.config/zsh/darwin" ] && source "$HOME/.config/zsh/darwin"
+
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
@@ -16,13 +19,6 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
 alias ls='eza --color=auto --icons --git --group-directories-first'
-
-case "$(uname -s)" in
-  Darwin)
-    alias vi=nvim
-    alias vim=nvim
-    ;;
-esac
 
 # fd: Debian ships as fdfind, Homebrew as fd
 if command -v fdfind &>/dev/null; then
@@ -57,10 +53,14 @@ export PATH="$QHOME/l64:$PATH"
 
 case "$(uname -s)" in
   Linux) alias q="taskset -c 0-23 rlwrap -r q" ;;
-  Darwin) alias q="rlwrap -r q" ;;
+  *) alias q="rlwrap -r q" ;;
 esac
 # End KDB-X Installation Configuration
 
-if [[ -n "$SSH_CONNECTION" ]] && [[ -z "$TMUX" ]] && [[ -z "$SSH_NO_TMUX" ]] && [[ "$TERM" != "screen"* ]]; then
-  tmux new-session -A -s ssh || tmux new-session -s ssh
+if [[ -z "$TMUX" ]] && [[ -z "$SSH_NO_TMUX" ]] && [[ "$TERM" != "screen"* ]] && [[ -t 0 ]]; then
+  if [[ -n "$SSH_CONNECTION" ]]; then
+    tmux new-session -A -s ssh
+  else
+    tmux new-session
+  fi
 fi

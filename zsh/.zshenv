@@ -6,7 +6,8 @@ if [ -d "$HOME/.local/bin" ] ; then
     PATH="$HOME/.local/bin:$PATH"
 fi
 
-export PATH="$PATH:$HOME/.dotnet/tools"
+export DOTNET_ROOT="/opt/homebrew/opt/dotnet/libexec"
+export PATH="$PATH:$DOTNET_ROOT:$HOME/.dotnet/tools"
 
 case "$(uname -s)" in
   Linux) export PATH=/usr/local/cuda-12.9/bin:$PATH ;;

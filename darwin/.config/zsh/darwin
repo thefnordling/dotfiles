@@ -1,0 +1,13 @@
+# macOS-specific zsh config
+# Sourced conditionally from .zshrc
+
+# Homebrew-first PATH (system python3 is too old)
+export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:$PATH"
+
+# Homebrew-installed tools
+export DOTNET_ROOT="/opt/homebrew/opt/dotnet/libexec"
+export PATH="$PATH:$DOTNET_ROOT:$HOME/.dotnet/tools"
+
+alias vi=nvim
+alias vim=nvim
+alias q="rlwrap -r q"

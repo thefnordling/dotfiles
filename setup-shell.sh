@@ -143,7 +143,12 @@ P10K_DIR="$HOME/.local/share/powerlevel10k"
 
 echo "[5/8] Applying dotfiles with GNU Stow..."
 
-for pkg in zsh powerlevel10k tmux; do
+STOW_PKGS="zsh powerlevel10k tmux"
+if is_macos; then
+    STOW_PKGS="$STOW_PKGS darwin"
+fi
+
+for pkg in $STOW_PKGS; do
     if [ ! -d "$SCRIPT_DIR/$pkg" ]; then
         echo "Error: stow package '$pkg' not found in $SCRIPT_DIR"
         exit 1
@@ -216,6 +221,19 @@ else
     stow -d "$SCRIPT_DIR" -t "$HOME" tmux
 fi
 echo "  ✓ tmux config applied"
+
+if is_macos; then
+    if [ -L "$HOME/.config/zsh/darwin" ]; then
+        echo "  → Restowing darwin package..."
+        _stow_hide_steam_symlinks
+        stow -d "$SCRIPT_DIR" -t "$HOME" -R darwin
+        _stow_restore_steam_symlinks
+    else
+        echo "  → Stowing darwin package..."
+        stow -d "$SCRIPT_DIR" -t "$HOME" darwin
+    fi
+    echo "  ✓ macOS config applied"
+fi
 
 echo "[6/8] Installing tmux plugins..."
 mkdir -p "$HOME/.config/tmux/plugins"
