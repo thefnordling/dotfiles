@@ -10,14 +10,15 @@ OS="$(uname -s)"
 echo "=== Shell Setup Script ==="
 echo "This script will:"
 echo "  1. Uninstall oh-my-zsh (if present)"
-echo "  2. Install zsh and GNU Stow"
+echo "  2. Install zsh, GNU Stow, and btop"
 echo "  3. Optionally change default shell to zsh"
 echo "  4. Install powerlevel10k"
-echo "  5. Apply dotfiles using GNU Stow"
-echo "  6. Install Nerd Font (macOS only, for powerlevel10k / eza icons)"
+echo "  5. Download btop Catppuccin theme (mocha, latte, frappe, macchiato)"
+echo "  6. Apply dotfiles using GNU Stow"
 echo "  7. Install tmux plugins (catppuccin, vim-tmux-navigator)"
 echo "  8. Install tmux-mem-cpu-load"
-echo "  9. Create secrets file for local environment"
+echo "  9. Install Nerd Font (macOS only, for powerlevel10k / eza icons)"
+echo "  10. Create secrets file for local environment"
 echo ""
 
 # ---------------------------------------------------------------------------
@@ -56,7 +57,7 @@ ensure_brew() {
     fi
 }
 
-echo "[1/8] Checking for oh-my-zsh..."
+echo "[1/10] Checking for oh-my-zsh..."
 if [ -d "$HOME/.oh-my-zsh" ]; then
     echo "  → oh-my-zsh detected, uninstalling..."
     
@@ -72,7 +73,7 @@ else
     echo "  ✓ oh-my-zsh not installed (skip)"
 fi
 
-echo "[2/8] Installing zsh and GNU Stow..."
+echo "[2/10] Installing zsh and GNU Stow..."
 if is_macos; then
     ensure_brew
 
@@ -80,12 +81,12 @@ if is_macos; then
     if ! command -v zsh &>/dev/null || [ "$(which zsh 2>/dev/null)" = "/bin/zsh" ]; then
         brew_install zsh
     fi
-    for pkg in stow tmux vivid eza fd; do
+    for pkg in stow tmux vivid eza fd btop; do
         brew_install "$pkg"
     done
 else
     MISSING_PKGS=""
-    for pkg in zsh stow tmux vivid eza fd; do
+    for pkg in zsh stow tmux vivid eza fd btop; do
         if ! command -v "$pkg" &> /dev/null; then
             MISSING_PKGS="$MISSING_PKGS $pkg"
         fi
@@ -98,7 +99,7 @@ else
     fi
 fi
 
-echo "[3/8] Changing default shell to zsh..."
+echo "[3/10] Changing default shell to zsh..."
 if is_macos; then
     CURRENT_SHELL=$(dscl . -read "/Users/$USER" UserShell | awk '{print $2}')
     ZSH_PATH="$(brew --prefix)/bin/zsh"
@@ -126,7 +127,7 @@ else
     fi
 fi
 
-echo "[4/8] Installing powerlevel10k..."
+echo "[4/10] Installing powerlevel10k..."
 P10K_DIR="$HOME/.local/share/powerlevel10k"
     if [ -d "$P10K_DIR" ]; then
         echo "  → powerlevel10k already exists, updating..."
@@ -141,9 +142,35 @@ P10K_DIR="$HOME/.local/share/powerlevel10k"
         echo "  ✓ powerlevel10k installed"
     fi
 
-echo "[5/8] Applying dotfiles with GNU Stow..."
+echo "[5/10] Download btop Catppuccin themes..."
+CATPPUCCIN_BTOP_VER="1.0.0"
+THEME_URL="https://github.com/catppuccin/btop/releases/download/${CATPPUCCIN_BTOP_VER}/themes.tar.gz"
+THEMES_DIR="$SCRIPT_DIR/btop/themes"
+mkdir -p "$THEMES_DIR"
 
-STOW_PKGS="zsh powerlevel10k tmux"
+THEME_TARBALL="$(mktemp /tmp/btop-theme-XXXXXX.tar.gz)"
+if [ -f "$THEMES_DIR/catppuccin_mocha.theme" ] && [ -f "$THEMES_DIR/catppuccin_latte.theme" ]; then
+    echo "  ✓ Catppuccin themes already downloaded (skip)"
+else
+    curl -fsSL "$THEME_URL" -o "$THEME_TARBALL"
+    for theme in catppuccin_mocha catppuccin_macchiato catppuccin_latte catppuccin_frappe; do
+        if [ ! -f "$THEMES_DIR/${theme}.theme" ]; then
+            mkdir -p /tmp/btop-theme-extract
+            tar -xzf "$THEME_TARBALL" -C /tmp/btop-theme-extract "themes/${theme}.theme"
+            cp "/tmp/btop-theme-extract/themes/${theme}.theme" "$THEMES_DIR/${theme}.theme"
+            echo "  ✓ ${theme}.theme downloaded"
+        else
+            echo "  ✓ ${theme}.theme already exists (skip)"
+        fi
+    done
+    rm -rf /tmp/btop-theme-extract
+    rm -f "$THEME_TARBALL"
+fi
+echo "  ✓ btop Catppuccin themes ready"
+
+echo "[6/10] Applying dotfiles with GNU Stow..."
+
+STOW_PKGS="zsh powerlevel10k tmux btop"
 if is_macos; then
     STOW_PKGS="$STOW_PKGS darwin"
 fi
@@ -235,7 +262,18 @@ if is_macos; then
     echo "  ✓ macOS config applied"
 fi
 
-echo "[6/8] Installing tmux plugins..."
+if [ -L "$HOME/.config/btop" ]; then
+    echo "  → Restowing btop package..."
+    _stow_hide_steam_symlinks
+    stow -d "$SCRIPT_DIR" -t "$HOME" -R btop
+    _stow_restore_steam_symlinks
+else
+    echo "  → Stowing btop package..."
+    stow -d "$SCRIPT_DIR" -t "$HOME" btop
+fi
+echo "  ✓ btop config applied"
+
+echo "[7/10] Installing tmux plugins..."
 mkdir -p "$HOME/.config/tmux/plugins"
 
 if [ -d "$HOME/.config/tmux/plugins/catppuccin" ]; then
@@ -262,7 +300,7 @@ else
     echo "  ✓ vim-tmux-navigator installed"
 fi
 
-echo "[7/9] Installing Nerd Font for powerlevel10k and eza icons..."
+echo "[9/10] Installing Nerd Font for powerlevel10k and eza icons..."
 if is_macos; then
     ensure_brew
     FONT_NAME="font-meslo-lg-nerd-font"
@@ -286,7 +324,7 @@ else
     echo "  → Install manually (e.g. 'sudo apt install fonts-firacode' or download Meslo from Nerd Fonts site)."
 fi
 
-echo "[8/9] Installing tmux-mem-cpu-load..."
+echo "[8/10] Installing tmux-mem-cpu-load..."
 
 if [ -x "$HOME/.local/bin/tmux-mem-cpu-load" ]; then
     echo "  ✓ tmux-mem-cpu-load already installed"
@@ -335,7 +373,7 @@ else
     fi
 fi
 
-echo "[9/9] Setting up secrets file..."
+echo "[10/10] Setting up secrets file..."
 SECRETS_DIR="$HOME/.config/secrets"
 SECRETS_FILE="$SECRETS_DIR/environment"
 if [ -f "$SECRETS_FILE" ]; then
